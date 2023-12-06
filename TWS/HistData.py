@@ -73,7 +73,7 @@ def main():
 
 
 
-    df = getBarsOneDayOneMinute(end_date='20231130', contract_month='202403')
+    df = getBarsOneDayOneMinute(end_date='20231202', contract_month='202403')
     print(df)
 
 
@@ -83,17 +83,17 @@ def main():
 
 main()
 
-import datetime
+# import datetime
 
-def printday(d:datetime.datetime):
-    if d.weekday() <= 4:
-        print(d, '\t', d.date(), '\t', d.day, '\t', d.weekday())
+# def printday(d:datetime.datetime):
+#     if d.weekday() <= 4:
+#         print(d, '\t', d.date(), '\t', d.day, '\t', d.weekday())
 
 
-d = datetime.datetime.now()
-dt = datetime.timedelta(days=1)
+# d = datetime.datetime.now()
+# dt = datetime.timedelta(days=1)
 
-printday(d)
-for i in range(20):
-    d = d - dt
-    printday(d)
+# printday(d)
+# for i in range(20):
+#     d = d - dt
+#     printday(d)
