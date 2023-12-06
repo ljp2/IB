@@ -82,3 +82,18 @@ def main():
 
 
 main()
+
+import datetime
+
+def printday(d:datetime.datetime):
+    if d.weekday() <= 4:
+        print(d, '\t', d.date(), '\t', d.day, '\t', d.weekday())
+
+
+d = datetime.datetime.now()
+dt = datetime.timedelta(days=1)
+
+printday(d)
+for i in range(20):
+    d = d - dt
+    printday(d)
