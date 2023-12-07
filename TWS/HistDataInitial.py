@@ -44,6 +44,11 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
     contract.exchange = "CME"
     contract.currency = "USD"
     contract.lastTradeDateOrContractMonth = contract_month
+    # contract.symbol = "SPY"
+    # contract.secType = "STK"
+    # contract.exchange = "SMART"
+    # contract.currency = "USD"
+    contract.lastTradeDateOrContractMonth = contract_month
 
     endDateTime = f"{end_date}-23:59:59"
 
@@ -88,7 +93,7 @@ def main(desired_number_days: int,  contract_month:str="202403", directory:str="
         number_gotdays += 1
         print(gotdate, '\t', gotweekday, '\t', df.shape)
         
-        filename = f'{directory}/{gotdate}'
+        filename = f'{directory}/{gotdate}.csv'
         df.to_csv(filename)
         
         day = index0 - dt
@@ -97,4 +102,6 @@ def main(desired_number_days: int,  contract_month:str="202403", directory:str="
     print("MAIN DONE")
 
 
-main(desired_number_days=3,  contract_month="202403", directory='~/junk')
+main(desired_number_days=2,  contract_month="202403", directory='~/junk')
+
+# ERROR 1 162 Historical Market Data Service error message:HMDS query returned no data: ESH4@CME Trades
