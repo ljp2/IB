@@ -66,7 +66,7 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
     return df
 
 
-def main(desired_number_days: int,  contract_month:str="202403"):
+def main(desired_number_days: int,  contract_month:str="202403", directory:str=""):
     global app
     app = TradingApp()
     app.connect("127.0.0.1", 7497, clientId=1)
@@ -85,13 +85,16 @@ def main(desired_number_days: int,  contract_month:str="202403"):
         index0:pd.Timestamp = df.index[0]
         gotdate = df.index[0].strftime('%Y%m%d')
         gotweekday = index0.day_name()
-        
-        print(gotdate, '\t', gotweekday, '\t', df.shape)
         number_gotdays += 1
+        print(gotdate, '\t', gotweekday, '\t', df.shape)
+        
+        filename = f'{directory}/{gotdate}'
+        df.to_csv(filename)
+        
         day = index0 - dt
 
     app.disconnect()
     print("MAIN DONE")
 
 
-main(5)
+main(desired_number_days=3,  contract_month="202403", directory='~/junk')
