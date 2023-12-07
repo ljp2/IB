@@ -11,7 +11,7 @@ class TradingApp(EWrapper, EClient):
     def __init__(self):
         EClient.__init__(self, self)
         self.event_done = threading.Event()
-        self.bars = []
+        self.bars =  None
 
     def historicalData(self, reqId, bar: BarData):
         self.bars.append(
@@ -36,6 +36,7 @@ def websocket_con():
 def getBarsOneDayOneMinute(end_date: str, contract_month: str):
     global app
     app.event_done.clear()
+    app.bars = []
 
     contract = Contract()
     contract.symbol = "ES"
@@ -44,10 +45,7 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
     contract.currency = "USD"
     contract.lastTradeDateOrContractMonth = contract_month
 
-    # endDateTime=''
     endDateTime = f"{end_date}-23:59:59"
-    # endDateTime='20231130-23:59:59'
-    print("endDateTime", endDateTime)
 
     app.reqHistoricalData(
         reqId=1,
@@ -61,12 +59,10 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
         keepUpToDate=0,
         chartOptions=[],
     )
-
     app.event_done.wait()
     df: pd.DataFrame = pd.DataFrame(app.bars)
     df["Date"] = pd.to_datetime(df["Date"])
     df.set_index("Date", inplace=True)
-
     return df
 
 
@@ -83,37 +79,19 @@ def main(desired_number_days: int,  contract_month:str="202403"):
 
     number_gotdays = 0
     while number_gotdays < desired_number_days:
-        end_date = day.strftime("%Y%m%d")
+        end_date =  day.strftime("%Y%m%d")
         df = getBarsOneDayOneMinute(end_date=end_date, contract_month=contract_month)
         
         index0:pd.Timestamp = df.index[0]
         gotdate = df.index[0].strftime('%Y%m%d')
         gotweekday = index0.day_name()
         
-        print(gotdate, '\t', gotweekday)
+        print(gotdate, '\t', gotweekday, '\t', df.shape)
         number_gotdays += 1
-
         day = index0 - dt
-    
-    # print(df)
 
     app.disconnect()
     print("MAIN DONE")
 
 
-main(2)
-
-# import datetime
-
-# def printday(d:datetime.datetime):
-#     if d.weekday() <= 4:
-#         print(d, '\t', d.date(), '\t', d.day, '\t', d.weekday())
-
-
-# d = datetime.datetime.now()
-# dt = datetime.timedelta(days=1)
-
-# printday(d)
-# for i in range(20):
-#     d = d - dt
-#     printday(d)
+main(5)
