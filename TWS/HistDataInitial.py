@@ -100,4 +100,4 @@ def main(desired_number_days: int, directory: str = ""):
     print("MAIN DONE")
 
 
-main(desired_number_days=7, directory='~/junk')
+main(desired_number_days=7, directory='c:/Data')
