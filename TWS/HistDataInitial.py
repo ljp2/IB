@@ -34,7 +34,7 @@ def websocket_con():
     app.run()
 
 
-def getBarsOneDayOneMinute(end_date: str, contract_month: str):
+def getBarsOneDayOneMinute(end_date: str):
     global app
     app.event_done.clear()
     app.bars = []
@@ -54,7 +54,7 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
         contract=contract,
         endDateTime=endDateTime,
         durationStr="1 D",
-        barSizeSetting="30 mins",
+        barSizeSetting="1 min",
         whatToShow="TRADES",
         useRTH=1,
         formatDate=1,
@@ -69,7 +69,7 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
     return df
 
 
-def main(desired_number_days: int, contract_month: str = "202403", directory: str = ""):
+def main(desired_number_days: int, directory: str = ""):
     global app
     app = TradingApp()
     app.connect("127.0.0.1", 7497, clientId=1)
@@ -83,7 +83,7 @@ def main(desired_number_days: int, contract_month: str = "202403", directory: st
     number_gotdays = 0
     while number_gotdays < desired_number_days:
         end_date = day.strftime("%Y%m%d")
-        df = getBarsOneDayOneMinute(end_date=end_date, contract_month=contract_month)
+        df = getBarsOneDayOneMinute(end_date=end_date)
 
         index0: pd.Timestamp = df.index[0]
         gotdate = df.index[0].strftime('%Y%m%d')
@@ -100,4 +100,4 @@ def main(desired_number_days: int, contract_month: str = "202403", directory: st
     print("MAIN DONE")
 
 
-main(desired_number_days=2, contract_month="202403", directory='~/junk')
+main(desired_number_days=7, directory='~/junk')
