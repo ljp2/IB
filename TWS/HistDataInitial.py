@@ -7,11 +7,12 @@ import threading
 import time
 import datetime
 
+
 class TradingApp(EWrapper, EClient):
     def __init__(self):
         EClient.__init__(self, self)
         self.event_done = threading.Event()
-        self.bars =  None
+        self.bars = None
 
     def historicalData(self, reqId, bar: BarData):
         self.bars.append(
@@ -39,18 +40,14 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
     app.bars = []
 
     contract = Contract()
-    contract.symbol = "ES"
-    contract.secType = "FUT"
-    contract.exchange = "CME"
-    contract.currency = "USD"
-    contract.lastTradeDateOrContractMonth = contract_month
-    # contract.symbol = "SPY"
-    # contract.secType = "STK"
-    # contract.exchange = "SMART"
-    # contract.currency = "USD"
-    contract.lastTradeDateOrContractMonth = contract_month
 
-    endDateTime = f"{end_date}-23:59:59"
+    contract = Contract()
+    contract.symbol = "SPX"
+    contract.secType = "IND"
+    contract.exchange = "CBOE"
+    contract.currency = "USD"
+
+    endDateTime = f"{end_date} 23:59:59 America/New_York"
 
     app.reqHistoricalData(
         reqId=1,
@@ -64,6 +61,7 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
         keepUpToDate=0,
         chartOptions=[],
     )
+
     app.event_done.wait()
     df: pd.DataFrame = pd.DataFrame(app.bars)
     df["Date"] = pd.to_datetime(df["Date"])
@@ -71,7 +69,7 @@ def getBarsOneDayOneMinute(end_date: str, contract_month: str):
     return df
 
 
-def main(desired_number_days: int,  contract_month:str="202403", directory:str=""):
+def main(desired_number_days: int, contract_month: str = "202403", directory: str = ""):
     global app
     app = TradingApp()
     app.connect("127.0.0.1", 7497, clientId=1)
@@ -84,24 +82,22 @@ def main(desired_number_days: int,  contract_month:str="202403", directory:str="
 
     number_gotdays = 0
     while number_gotdays < desired_number_days:
-        end_date =  day.strftime("%Y%m%d")
+        end_date = day.strftime("%Y%m%d")
         df = getBarsOneDayOneMinute(end_date=end_date, contract_month=contract_month)
-        
-        index0:pd.Timestamp = df.index[0]
+
+        index0: pd.Timestamp = df.index[0]
         gotdate = df.index[0].strftime('%Y%m%d')
         gotweekday = index0.day_name()
         number_gotdays += 1
         print(gotdate, '\t', gotweekday, '\t', df.shape)
-        
+
         filename = f'{directory}/{gotdate}.csv'
         df.to_csv(filename)
-        
+
         day = index0 - dt
 
     app.disconnect()
     print("MAIN DONE")
 
 
-main(desired_number_days=2,  contract_month="202403", directory='~/junk')
-
-# ERROR 1 162 Historical Market Data Service error message:HMDS query returned no data: ESH4@CME Trades
+main(desired_number_days=2, contract_month="202403", directory='~/junk')
