@@ -89,30 +89,48 @@ def main():
     # df = df.iloc[:11]
     rf = reduceDF(df, 5)
     hf = hybridDF(df,5)
+
     hf['row_number'] = hf.reset_index().index
     xf = hf[hf.row_number % 5 == 0]
 
-    apmavs = [ mpf.make_addplot(df.Close)]
+    plots = []
+    for i in range(5):
+        d = hf[hf.row_number % 5 == i]
+        plots.append(Process(target=PlotCandles, args=(d, f'hf - {i}')))
+
+    for pi in plots:
+        pi.start()
+        # pi.join()
+       
+
+
+
+
+
+
+
+
+    # apmavs = [ mpf.make_addplot(df.Close)]
               
-    # PlotCandles(df,'a;sdfjk')
-    # mpf.plot(xf, type='candle', style='charles',
-    #          addplot=apmavs)
+    # # PlotCandles(df,'a;sdfjk')
+    # # mpf.plot(xf, type='candle', style='charles',
+    # #          addplot=apmavs)
 
-    ap = [ mpf.make_addplot(df.Close)]
-    hap = [ mpf.make_addplot(df.loc[hf.index[0]:hf.index[-1]].Close)]
+    # ap = [ mpf.make_addplot(df.Close)]
+    # hap = [ mpf.make_addplot(df.loc[hf.index[0]:hf.index[-1]].Close)]
     
     
-    p1 = Process(target=PlotCandles, args=(df, 'df', ap))
-    p2 = Process(target=PlotCandles, args=(rf, 'reduce'))
-    # p3 = Process(target=PlotCandles, args=(hf, 'hybrid', hap))
-    p3 = Process(target=PlotCandles, args=(xf, 'hybrid-5'))
+    # p1 = Process(target=PlotCandles, args=(df, 'df', ap))
+    # p2 = Process(target=PlotCandles, args=(rf, 'reduce'))
+    # # p3 = Process(target=PlotCandles, args=(hf, 'hybrid', hap))
+    # p3 = Process(target=PlotCandles, args=(xf, 'hybrid-5'))
 
-    p1.start()
-    p2.start()
-    p3.start()
-    p1.join()
-    p2.join()
-    p3.join()
+    # p1.start()
+    # p2.start()
+    # p3.start()
+    # p1.join()
+    # p2.join()
+    # p3.join()
     
 if __name__ == '__main__':
     main()
