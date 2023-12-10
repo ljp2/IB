@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import mplfinance as mpf 
 from datetime import datetime, time
 from multiprocessing import Process
+import pandas_ta as ta 
 
 def ohlc(df:pd.DataFrame, bar_index_first=True):
     """Reduces the dataframe to a single ohlc line
@@ -105,31 +106,23 @@ def PlotCandles(df:pd.DataFrame, title="", addplot=None):
 #         # pi.join()
        
 
-df:pd.DataFrame = pd.read_csv('~/Data/20231130.csv', index_col=0, parse_dates=True)
+if __name__ == "__main__":
+    df:pd.DataFrame = pd.read_csv('~/Data/20231130.csv', index_col=0, parse_dates=True)
+    hf = hybridDF(df,5)
+    # Get the current date
+    current_date = hf.index[0]
+    start = datetime.combine(current_date, time(9,30))
 
+    ds = [pd.DataFrame() for i in range(5)]
 
+    for index, row in hf.iterrows():
+        i = (index - start).seconds // 60 % 5
+        ds[i] = pd.concat([ds[i], row.to_frame().transpose()])
 
-
-# Get the current date
-current_date = df.index[0]
-start = datetime.combine(current_date, time(9,30))
-
-ds = [pd.DataFrame() for i in range(5)]
-
-for index, row in df.iterrows():
-    # hour = current_datetime.hour
-    # minute = current_datetime.minute
-    # minute_of_day = hour * 60 + minute
-    i = (index - start).seconds // 60 % 5
-    ds[i] = pd.concat([ds[i], row.to_frame().transpose()])
-
-
-for i in range(5):
-    print()
-    print('index', i)
-    print(ds[i].shape)
-    print(ds[i].head(2))
-    print(ds[i].tail(2))
+    for i in range(5):
+        h = ds[i].ta.ha()
+        h.columns = 'Open High Low Close'.split(' ')
+        Process(target=PlotCandles, args=(h, f'plot - {i}')).start()
 
 
     # apmavs = [ mpf.make_addplot(df.Close)]
