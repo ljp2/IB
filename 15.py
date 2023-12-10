@@ -4,7 +4,7 @@ import mplfinance as mpf
 
 from multiprocessing import Process
 
-def ohlc(df:pd.DataFrame):
+def ohlc(df:pd.DataFrame, bar_index_first=True):
     """Reduces the dataframe to a single ohlc line
 
     Args:
@@ -12,14 +12,15 @@ def ohlc(df:pd.DataFrame):
 
     Returns:
         pd.DataFrame: frame consists of one record with Open, Hign, Low, Close column names
-    """    
+    """
+    index = df.index[0] if bar_index_first else df.index[-1]
     x = [{
         'Open' : df.Open.iloc[0],
         'High' : df.High.max(),
         'Low' : df.Low.min(),
         'Close' : df.Close.iloc[-1]
     }]
-    return pd.DataFrame(x, index=[df.index[0]])
+    return pd.DataFrame(x, index=[index])
 
 
 def reduceDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
@@ -68,7 +69,7 @@ def hybridDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
     end = start + group_sz
     while end <= N:
         xf = pd.concat(
-            [xf, ohlc(df.iloc[start:end])]
+            [xf, ohlc(df.iloc[start:end], False)]
         )
         start += 1
         end += 1
@@ -76,28 +77,41 @@ def hybridDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
 
 
 
-def PlotCandles(df:pd.DataFrame):
-    mpf.plot(df, type='candle', style='charles')
+def PlotCandles(df:pd.DataFrame, title="", addplot=None):
+    if addplot is not None:
+        mpf.plot(df, type='candle', style='charles', title=title, addplot=addplot)
+    else:
+        mpf.plot(df, type='candle', style='charles', title=title)
 
 def main():
-    df:pd.DataFrame = pd.read_csv('~/Data/20231130.csv', index_col=0, parse_dates=True)
-    # xf = combineDF(df, 5)
+    df:pd.DataFrame = pd.read_csv('c:/Data/20231130.csv', index_col=0, parse_dates=True)
 
-    xf = hybridDF(df,5)
+    # df = df.iloc[:11]
+    rf = reduceDF(df, 5)
+    hf = hybridDF(df,5)
+
 
 
     apmavs = [ mpf.make_addplot(df.Close)]
               
-    mpf.plot(xf, type='candle', style='charles',
-             addplot=apmavs)
+    # PlotCandles(df,'a;sdfjk')
+    # mpf.plot(xf, type='candle', style='charles',
+    #          addplot=apmavs)
 
-
-    # p1 = Process(target=PlotCandles, args=(df,))
-    # p2 = Process(target=PlotCandles, args=(xf,))
-    # p1.start()
-    # p2.start()
-    # p1.join()
-    # p2.join()
-
+    ap = [ mpf.make_addplot(df.Close)]
+    hap = [ mpf.make_addplot(df.loc[hf.index[0]:hf.index[-1]].Close)]
+    
+    
+    p1 = Process(target=PlotCandles, args=(df, 'df', ap))
+    p2 = Process(target=PlotCandles, args=(rf, 'reduce'))
+    p3 = Process(target=PlotCandles, args=(hf, 'hybrid', hap))
+    
+    p1.start()
+    p2.start()
+    p3.start()
+    p1.join()
+    p2.join()
+    p3.join()
+    
 if __name__ == '__main__':
     main()
