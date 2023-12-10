@@ -84,13 +84,13 @@ def PlotCandles(df:pd.DataFrame, title="", addplot=None):
         mpf.plot(df, type='candle', style='charles', title=title)
 
 def main():
-    df:pd.DataFrame = pd.read_csv('c:/Data/20231130.csv', index_col=0, parse_dates=True)
+    df:pd.DataFrame = pd.read_csv('~/Data/20231130.csv', index_col=0, parse_dates=True)
 
     # df = df.iloc[:11]
     rf = reduceDF(df, 5)
     hf = hybridDF(df,5)
-
-
+    hf['row_number'] = hf.reset_index().index
+    xf = hf[hf.row_number % 5 == 0]
 
     apmavs = [ mpf.make_addplot(df.Close)]
               
@@ -104,8 +104,9 @@ def main():
     
     p1 = Process(target=PlotCandles, args=(df, 'df', ap))
     p2 = Process(target=PlotCandles, args=(rf, 'reduce'))
-    p3 = Process(target=PlotCandles, args=(hf, 'hybrid', hap))
-    
+    # p3 = Process(target=PlotCandles, args=(hf, 'hybrid', hap))
+    p3 = Process(target=PlotCandles, args=(xf, 'hybrid-5'))
+
     p1.start()
     p2.start()
     p3.start()
