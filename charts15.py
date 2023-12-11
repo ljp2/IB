@@ -1,9 +1,36 @@
 import pandas as pd 
+
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
 import mplfinance as mpf 
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from multiprocessing import Process
 import pandas_ta as ta 
+
+def plotCandlestick(df:pd.DataFrame, title=""):
+    fig, ax = plt.subplots()
+    ax.set_title(title)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-H:%M'))
+    plt.xticks(rotation=30, ha='right') 
+    
+    col1 = 'red'
+    col2 = 'green'
+    width = (df.index[1] - df.index[0]) * 0.6
+    width2 = width * 0.3
+
+    up = df[df.Close >= df.Open] 
+    down = df[df.Close < df.Open] 
+
+    ax.bar(up.index, up.Close-up.Open, width, bottom=up.Open, color=col1) 
+    ax.bar(up.index, up.High-up.Close, width2, bottom=up.Close, color=col1) 
+    ax.bar(up.index, up.Low-up.Open, width2, bottom=up.Open, color=col1) 
+
+    ax.bar(down.index, down.Close-down.Open, width, bottom=down.Open, color=col2) 
+    ax.bar(down.index, down.High-down.Open, width2, bottom=down.Open, color=col2) 
+    ax.bar(down.index, down.Low-down.Close, width2, bottom=down.Close, color=col2) 
+
+    plt.show() 
 
 def ohlc(df:pd.DataFrame, bar_index_first=True):
     """Reduces the dataframe to a single ohlc line
@@ -41,7 +68,7 @@ def reduceDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
     numdfrows = df.shape[0]
     ngroups = numdfrows // group_sz
     numtargetrows = ngroups * group_sz
-    start = numdfrows - numtargetrows
+   
     while start < numdfrows:
         end = start + group_sz
         xf = pd.concat(
@@ -78,11 +105,11 @@ def hybridDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
 
 
 
-def PlotCandles(df:pd.DataFrame, title="", addplot=None):
-    if addplot is not None:
-        mpf.plot(df, type='candle', style='charles', title=title, addplot=addplot)
-    else:
-        mpf.plot(df, type='candle', style='charles', title=title)
+# def PlotCandles(df:pd.DataFrame, title="", addplot=None):
+#     if addplot is not None:
+#         mpf.plot(df, type='candle', style='charles', title=title, addplot=addplot)
+#     else:
+#         mpf.plot(df, type='candle', style='charles', title=title)
 
 
 
@@ -122,7 +149,7 @@ if __name__ == "__main__":
     for i in range(5):
         h = ds[i].ta.ha()
         h.columns = 'Open High Low Close'.split(' ')
-        Process(target=PlotCandles, args=(h, f'plot - {i}')).start()
+        Process(target=plotCandlestick, args=(h, f'plot - {i}')).start()
 
 
     # apmavs = [ mpf.make_addplot(df.Close)]
