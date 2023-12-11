@@ -11,24 +11,24 @@ import pandas_ta as ta
 def plotCandlestick(df:pd.DataFrame, title=""):
     fig, ax = plt.subplots()
     ax.set_title(title)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%-H:%M'))
-    plt.xticks(rotation=30, ha='right') 
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    # plt.xticks(rotation=30, ha='right') 
     
-    col1 = 'red'
-    col2 = 'green'
+    coldn = 'red'
+    colup = 'green'
     width = (df.index[1] - df.index[0]) * 0.6
     width2 = width * 0.3
 
     up = df[df.Close >= df.Open] 
     down = df[df.Close < df.Open] 
 
-    ax.bar(up.index, up.Close-up.Open, width, bottom=up.Open, color=col1) 
-    ax.bar(up.index, up.High-up.Close, width2, bottom=up.Close, color=col1) 
-    ax.bar(up.index, up.Low-up.Open, width2, bottom=up.Open, color=col1) 
+    ax.bar(up.index, up.Close-up.Open, width, bottom=up.Open, color=colup) 
+    ax.bar(up.index, up.High-up.Close, width2, bottom=up.Close, color=colup) 
+    ax.bar(up.index, up.Low-up.Open, width2, bottom=up.Open, color=colup) 
 
-    ax.bar(down.index, down.Close-down.Open, width, bottom=down.Open, color=col2) 
-    ax.bar(down.index, down.High-down.Open, width2, bottom=down.Open, color=col2) 
-    ax.bar(down.index, down.Low-down.Close, width2, bottom=down.Close, color=col2) 
+    ax.bar(down.index, down.Close-down.Open, width, bottom=down.Open, color=coldn) 
+    ax.bar(down.index, down.High-down.Open, width2, bottom=down.Open, color=coldn) 
+    ax.bar(down.index, down.Low-down.Close, width2, bottom=down.Close, color=coldn) 
 
     plt.show() 
 
@@ -103,7 +103,34 @@ def hybridDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
         end += 1
     return xf
 
+def ha(df:pd.DataFrame):
+    """Candle Type: Heikin Ashi"""
+    # Validate Arguments
+    open_ = df['Open']
+    high =df['High']
+    low = df['Low']
+    close = df['Close']
 
+    # Calculate Result
+    m = close.size
+    hf = pd.DataFrame({
+        "Open": 0.5 * (open_.iloc[0] + close.iloc[0]),
+        "High": high,
+        "Low": low,
+        "Close": 0.25 * (open_ + high + low + close),
+    })
+
+    for i in range(1, m):
+        hf["Open"].iloc[i] = 0.5 * (hf["Open"].iloc[i - 1] + hf["Close"].iloc[i - 1])
+
+    hf["High"] = hf[["Open", "High", "Close"]].max(axis=1)
+    hf["Low"] = hf[["Open", "Low", "Close"]].min(axis=1)
+
+    # Name and Categorize it
+    # hf.name = "Heikin-Ashi"
+    # hf.category = "candles"
+
+    return hf
 
 # def PlotCandles(df:pd.DataFrame, title="", addplot=None):
 #     if addplot is not None:
@@ -134,7 +161,7 @@ def hybridDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
        
 
 if __name__ == "__main__":
-    df:pd.DataFrame = pd.read_csv('~/Data/20231130.csv', index_col=0, parse_dates=True)
+    df:pd.DataFrame = pd.read_csv('c:/Data/20231130.csv', index_col=0, parse_dates=True)
     hf = hybridDF(df,5)
     # Get the current date
     current_date = hf.index[0]
@@ -147,9 +174,10 @@ if __name__ == "__main__":
         ds[i] = pd.concat([ds[i], row.to_frame().transpose()])
 
     for i in range(5):
-        h = ds[i].ta.ha()
-        h.columns = 'Open High Low Close'.split(' ')
+        h = ha(ds[i])
         Process(target=plotCandlestick, args=(h, f'plot - {i}')).start()
+        # plotCandlestick(h, "test")
+        
 
 
     # apmavs = [ mpf.make_addplot(df.Close)]
