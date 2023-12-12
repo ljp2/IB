@@ -1,3 +1,4 @@
+import platform
 import pandas as pd 
 
 import matplotlib.pyplot as plt
@@ -161,7 +162,10 @@ def ha(df:pd.DataFrame):
        
 
 if __name__ == "__main__":
-    df:pd.DataFrame = pd.read_csv('c:/Data/20231130.csv', index_col=0, parse_dates=True)
+    barfilename = "20231130.csv"
+    filedirectory = '~/Data' if platform.system()=='Darwin' else 'c:/Data'
+    filepath = f'{filedirectory}/{barfilename}'
+    df:pd.DataFrame = pd.read_csv(filepath, index_col=0, parse_dates=True)
     hf = hybridDF(df,5)
     # Get the current date
     current_date = hf.index[0]
