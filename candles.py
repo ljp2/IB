@@ -134,3 +134,13 @@ df:pd.DataFrame = pd.read_csv(filepath, index_col=0, parse_dates=True)
 
 
 # x=1
+class Bars():
+    def __init__(self, df:pd.DataFrame=None) -> None:
+        if df is not None:
+            self.df = df.copy()
+        else:
+            self.df = pd.DataFrame()
+            
+    def addBar(self, bar:pd.DataFrame):
+        self.df = pd.concat([self.df, bar])
+        
