@@ -90,7 +90,7 @@ def ha(df: pd.DataFrame):
     high = df["High"]
     low = df["Low"]
     close = df["Close"]
-    m = close.size
+    m = close.shape
     hf = pd.DataFrame(
         {
             "Open": 0.5 * (open_.iloc[0] + close.iloc[0]),
@@ -141,29 +141,42 @@ class Candles:
     def __init__(self, df: pd.DataFrame = None, group_sz: int = 5) -> None:
         self.group_sz = group_sz
         if df is None:
-            self.df = pd.DataFrame()
+            self.df = None
             self.hf = None
-        elif self.df.size[0] < group_sz:
-            self.__dict__
+        elif self.df.shape[0] < group_sz:
             self.df = df.copy()
             self.hf = None
         else:
             self.df = df.copy()
             self.initHF()
-
-    def initHF(self):
-        self.hf = hybridDF(df=self.df, group_sz=group_sz)
 
     def addBar(self, bar: pd.DataFrame):
-        self.df = pd.concat([self.df, bar])
-        N = self.df.size[0]
-        if N > self.group_sz:
-            self.addNewHybrid(bar)
-        elif N == self.group_sz:
-            self.initHF()
+        if self.df is  None:
+            self.df = bar.copy()
         else:
-            pass
+            self.df = pd.concat([self.df, bar])
+            N = self.df.shape[0]
+            if N > self.group_sz:
+                self.addNewHybrid(bar)
+            elif N == self.group_sz:
+                self.initHF()
+            else:
+                pass
+
+    def initHF(self):
+        self.hf = hybridDF(df=self.df, group_sz=self.group_sz)
 
     def addNewHybrid(self, bar: pd.DataFrame):
         hfbar = ohlc(self.df.iloc[-self.group_sz :], bar_index_first=False)
-        hf = pd.concat(hf, hfbar)
+        self.hf = pd.concat([self.hf, hfbar])
+
+
+# df:pd.DataFrame = pd.read_csv('~/Data/20231130.csv', index_col=0, parse_dates=True)
+# c = Candles()
+# for index, row_df in df.iloc[:10].groupby(level=0):
+#     c.addBar(row_df)
+    
+#     print(index)
+#     print(c.df)
+#     print(c.hf)
+#     print()
