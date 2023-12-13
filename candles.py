@@ -105,7 +105,10 @@ def ha(df: pd.DataFrame):
     hf["Low"] = hf[["Open", "Low", "Close"]].min(axis=1)
     return hf
 
-def updateDfHfWithBar(df:pd.DataFrame, hf:pd.DataFrame, bar:pd.DataFrame, group_sz:int):
+
+def updateDfHfWithBar(
+    df: pd.DataFrame, hf: pd.DataFrame, bar: pd.DataFrame, group_sz: int
+):
     """Appends the new bar (represent as single record dataframe) to orignal bars dataframe.
     Calculates a new hybrid bar and appends to the hybrid dataframe
 
@@ -118,13 +121,13 @@ def updateDfHfWithBar(df:pd.DataFrame, hf:pd.DataFrame, bar:pd.DataFrame, group_
     df = pd.concat(df, bar)
     hfbar = ohlc(df.iloc[-group_sz:], bar_index_first=False)
     hf = pd.concat(hf, hfbar)
-    
 
-import platform
-barfilename = "20231130.csv"
-filedirectory = '~/Data' if platform.system()=='Darwin' else 'c:/Data'
-filepath = f'{filedirectory}/{barfilename}'
-df:pd.DataFrame = pd.read_csv(filepath, index_col=0, parse_dates=True)
+
+# import platform
+# barfilename = "20231130.csv"
+# filedirectory = '~/Data' if platform.system()=='Darwin' else 'c:/Data'
+# filepath = f'{filedirectory}/{barfilename}'
+# df:pd.DataFrame = pd.read_csv(filepath, index_col=0, parse_dates=True)
 
 # d5 = reduceDF(df, 5)
 # hf = hybridDF(df, 5)
@@ -134,13 +137,33 @@ df:pd.DataFrame = pd.read_csv(filepath, index_col=0, parse_dates=True)
 
 
 # x=1
-class Bars():
-    def __init__(self, df:pd.DataFrame=None) -> None:
-        if df is not None:
-            self.df = df.copy()
-        else:
+class Candles:
+    def __init__(self, df: pd.DataFrame = None, group_sz: int = 5) -> None:
+        self.group_sz = group_sz
+        if df is None:
             self.df = pd.DataFrame()
-            
-    def addBar(self, bar:pd.DataFrame):
+            self.hf = None
+        elif self.df.size[0] < group_sz:
+            self.__dict__
+            self.df = df.copy()
+            self.hf = None
+        else:
+            self.df = df.copy()
+            self.initHF()
+
+    def initHF(self):
+        self.hf = hybridDF(df=self.df, group_sz=group_sz)
+
+    def addBar(self, bar: pd.DataFrame):
         self.df = pd.concat([self.df, bar])
-        
+        N = self.df.size[0]
+        if N > self.group_sz:
+            self.addNewHybrid(bar)
+        elif N == self.group_sz:
+            self.initHF()
+        else:
+            pass
+
+    def addNewHybrid(self, bar: pd.DataFrame):
+        hfbar = ohlc(self.df.iloc[-self.group_sz :], bar_index_first=False)
+        hf = pd.concat(hf, hfbar)
