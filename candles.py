@@ -123,20 +123,6 @@ def updateDfHfWithBar(
     hf = pd.concat(hf, hfbar)
 
 
-# import platform
-# barfilename = "20231130.csv"
-# filedirectory = '~/Data' if platform.system()=='Darwin' else 'c:/Data'
-# filepath = f'{filedirectory}/{barfilename}'
-# df:pd.DataFrame = pd.read_csv(filepath, index_col=0, parse_dates=True)
-
-# d5 = reduceDF(df, 5)
-# hf = hybridDF(df, 5)
-
-# zf = df.iloc[:-3]
-# zhf = hybridDF(zf, 5)
-
-
-# x=1
 class Candles:
     def __init__(self, df: pd.DataFrame = None, group_sz: int = 5) -> None:
         self.group_sz = group_sz
@@ -170,13 +156,3 @@ class Candles:
         hfbar = ohlc(self.df.iloc[-self.group_sz :], bar_index_first=False)
         self.hf = pd.concat([self.hf, hfbar])
 
-
-# df:pd.DataFrame = pd.read_csv('~/Data/20231130.csv', index_col=0, parse_dates=True)
-# c = Candles()
-# for index, row_df in df.iloc[:10].groupby(level=0):
-#     c.addBar(row_df)
-    
-#     print(index)
-#     print(c.df)
-#     print(c.hf)
-#     print()
