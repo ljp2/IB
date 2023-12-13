@@ -69,7 +69,7 @@ def reduceDF(df:pd.DataFrame, group_sz:int) -> pd.DataFrame:
     numdfrows = df.shape[0]
     ngroups = numdfrows // group_sz
     numtargetrows = ngroups * group_sz
-   
+    start = numdfrows - numtargetrows
     while start < numdfrows:
         end = start + group_sz
         xf = pd.concat(
