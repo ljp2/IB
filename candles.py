@@ -129,7 +129,7 @@ class Candles:
         if df is None:
             self.df = None
             self.hf = None
-        elif self.df.shape[0] < group_sz:
+        elif df.shape[0] < group_sz:
             self.df = df.copy()
             self.hf = None
         else:
