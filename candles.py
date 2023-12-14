@@ -105,24 +105,6 @@ def ha(df: pd.DataFrame):
     hf["Low"] = hf[["Open", "Low", "Close"]].min(axis=1)
     return hf
 
-
-def updateDfHfWithBar(
-    df: pd.DataFrame, hf: pd.DataFrame, bar: pd.DataFrame, group_sz: int
-):
-    """Appends the new bar (represent as single record dataframe) to orignal bars dataframe.
-    Calculates a new hybrid bar and appends to the hybrid dataframe
-
-    Args:
-        df (pd.DataFrame): The dataframe of original bars
-        hf (pd.DataFrame): The hybrid data frame that will be update.
-        bar (pd.DataFrame): The new bar. The format of this bar is a pd.DataFrame consiting of a single record.
-        group_sz (int): The group size of the hybrid data frame.
-    """
-    df = pd.concat(df, bar)
-    hfbar = ohlc(df.iloc[-group_sz:], bar_index_first=False)
-    hf = pd.concat(hf, hfbar)
-
-
 class Candles:
     def __init__(self, df: pd.DataFrame = None, group_sz: int = 5) -> None:
         self.group_sz = group_sz
@@ -134,25 +116,26 @@ class Candles:
             self.hf = None
         else:
             self.df = df.copy()
-            self.initHF()
+            self.hf = hybridDF(df=self.df, group_sz=self.group_sz)
 
-    def addBar(self, bar: pd.DataFrame):
+    def addNewBar(self, bar: pd.DataFrame):
+        """Appends the new bar (represent as single record dataframe) to orignal bars dataframe.
+        Calculates a new hybrid bar and appends to the hybrid dataframe
+
+        Args:
+            bar (pd.DataFrame): The new bar. The format of this bar is a pd.DataFrame consiting of 
+            a single record.
+        """
         if self.df is  None:
             self.df = bar.copy()
         else:
             self.df = pd.concat([self.df, bar])
             N = self.df.shape[0]
             if N > self.group_sz:
-                self.addNewHybrid(bar)
+                hfbar = ohlc(self.df.iloc[-self.group_sz :], bar_index_first=False)
+                self.hf = pd.concat([self.hf, hfbar])
             elif N == self.group_sz:
                 self.initHF()
             else:
                 pass
-
-    def initHF(self):
-        self.hf = hybridDF(df=self.df, group_sz=self.group_sz)
-
-    def addNewHybrid(self, bar: pd.DataFrame):
-        hfbar = ohlc(self.df.iloc[-self.group_sz :], bar_index_first=False)
-        self.hf = pd.concat([self.hf, hfbar])
 
