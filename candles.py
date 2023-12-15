@@ -142,14 +142,9 @@ class Candles:
             else:
                 pass
 
-    def getGFcandlesEnding(self, relative_ending_indx:int):
-        """Extracts every group_sz candle starting from relative_ending index from end
-
-        Args:
-            relative_ending_indx (int): the number of index from end.
-            Note 0 implies last record in self.gf
+    def getLatestGFgroup(self):
+        """Extracts every group_sz candle starting from and including lastest bar
         """
-        N = self.gf.shape[0]
-        last_index = N - relative_ending_indx - 1
+        last_index = self.gf.shape[0] - 1
         gf = self.gf.iloc[range(last_index, 0, -self.group_sz)[::-1]]
         return gf
