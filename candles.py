@@ -90,8 +90,8 @@ def ha(df: pd.DataFrame):
     high = df["High"]
     low = df["Low"]
     close = df["Close"]
-    m = close.shape
-    hf = pd.DataFrame(
+    n = close.shape[0]
+    ha = pd.DataFrame(
         {
             "Open": 0.5 * (open_.iloc[0] + close.iloc[0]),
             "High": high,
@@ -99,24 +99,27 @@ def ha(df: pd.DataFrame):
             "Close": 0.25 * (open_ + high + low + close),
         }
     )
-    for i in range(1, m):
-        hf["Open"].iloc[i] = 0.5 * (hf["Open"].iloc[i - 1] + hf["Close"].iloc[i - 1])
-    hf["High"] = hf[["Open", "High", "Close"]].max(axis=1)
-    hf["Low"] = hf[["Open", "Low", "Close"]].min(axis=1)
-    return hf
+    for i in range(1, n):
+        ha["Open"].iloc[i] = 0.5 * (ha["Open"].iloc[i - 1] + ha["Close"].iloc[i - 1])
+    ha["High"] = ha[["Open", "High", "Close"]].max(axis=1)
+    ha["Low"] = ha[["Open", "Low", "Close"]].min(axis=1)
+    return ha
 
 class Candles:
+    """Creates and maintains the raw candles of 1 minute dataframe.
+    Also credate and maintains a grouped data from which is groups candles
+    """
     def __init__(self, df: pd.DataFrame = None, group_sz: int = 5) -> None:
         self.group_sz = group_sz
         if df is None:
             self.df = None
-            self.hf = None
+            self.gf = None
         elif df.shape[0] < group_sz:
             self.df = df.copy()
-            self.hf = None
+            self.gf = None
         else:
             self.df = df.copy()
-            self.hf = hybridDF(df=self.df, group_sz=self.group_sz)
+            self.gf = hybridDF(df=self.df, group_sz=self.group_sz)
 
     def addNewBar(self, bar: pd.DataFrame):
         """Appends the new bar (represent as single record dataframe) to orignal bars dataframe.
@@ -133,9 +136,20 @@ class Candles:
             N = self.df.shape[0]
             if N > self.group_sz:
                 hfbar = ohlc(self.df.iloc[-self.group_sz :], bar_index_first=False)
-                self.hf = pd.concat([self.hf, hfbar])
+                self.gf = pd.concat([self.gf, hfbar])
             elif N == self.group_sz:
                 self.initHF()
             else:
                 pass
 
+    def getGFcandlesEnding(self, relative_ending_indx:int):
+        """Extracts every group_sz candle starting from relative_ending index from end
+
+        Args:
+            relative_ending_indx (int): the number of index from end.
+            Note 0 implies last record in self.gf
+        """
+        N = self.gf.shape[0]
+        last_index = N - relative_ending_indx - 1
+        gf = self.gf.iloc[range(last_index, 0, -self.group_sz)[::-1]]
+        return gf
