@@ -8,7 +8,7 @@ from multiprocessing import Process
 def plotCandlestick(df: pd.DataFrame, title=""):
     fig, ax = plt.subplots()
     ax.set_title(title)
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     # plt.xticks(rotation=30, ha='right')
 
     coldn = "red"
@@ -33,3 +33,5 @@ def plotCandlestick(df: pd.DataFrame, title=""):
 def plotProcess(df: pd.DataFrame, title=None):
     process = Process(target=plotCandlestick, args=(df, title))
     process.start()
+
+

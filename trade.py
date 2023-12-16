@@ -1,11 +1,14 @@
 import matplotlib.pyplot as plt
 from matplotlib import axes
+import matplotlib.dates as mdates
 
 import numpy as np
 import pandas as pd
 import time
 from multiprocessing import Process, Queue
 import platform
+
+import plots
 
 
 class PlotProcess:
@@ -16,13 +19,30 @@ class PlotProcess:
         plot_process.daemon = True
         plot_process.start()
 
-    def plotProcess(self, df: pd.DataFrame, q: Queue):
-        x = 1
-        print(f"Process Called {x}")
-        while True:
-            z = self.q.get()
-            x += 1
-            print(f"Process Queue {z} x = {x}")
+    def plotProcess(self, df: pd.DataFrame, q: Queue=None, title=""):
+        plots.plotCandlestick(self.df, title="From Trade")
+        # fig, ax = plt.subplots()
+        # ax.set_title(title)
+        # ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+        # # plt.xticks(rotation=30, ha='right')
+
+        # coldn = "red"
+        # colup = "green"
+        # width = (df.index[1] - df.index[0]) * 0.6
+        # width2 = width * 0.3
+
+        # up = df[df.Close >= df.Open]
+        # down = df[df.Close < df.Open]
+
+        # ax.bar(up.index, up.Close - up.Open, width, bottom=up.Open, color=colup)
+        # ax.bar(up.index, up.High - up.Close, width2, bottom=up.Close, color=colup)
+        # ax.bar(up.index, up.Low - up.Open, width2, bottom=up.Open, color=colup)
+
+        # ax.bar(down.index, down.Close - down.Open, width, bottom=down.Open, color=coldn)
+        # ax.bar(down.index, down.High - down.Open, width2, bottom=down.Open, color=coldn)
+        # ax.bar(down.index, down.Low - down.Close, width2, bottom=down.Close, color=coldn)
+
+        # plt.show()
 
 
 def initialize(filename:str):
@@ -58,16 +78,16 @@ def main():
     filepath = f'{filedirectory}/{barfilename}'
     plot_process = initialize(filepath)
     # while not allstop:
-    for i in range(3):
-        waitforarrival()
-        analyze()
-        plot(plot_process)
-        decide()
-        summarize()
+    # for i in range(3):
+    #     waitforarrival()
+    #     analyze()
+    #     plot(plot_process)
+    #     decide()
+    #     summarize()
         
-        time.sleep(1)
+    #     time.sleep(1)
 
-
+    input("enter to stop")
 
 if __name__ == "__main__":
     main()
