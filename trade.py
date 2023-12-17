@@ -14,13 +14,14 @@ import plots
 class PlotProcess:
     def __init__(self, df: pd.DataFrame) -> None:
         self.df = df
-        self.q = Queue()
+        self.i:int =0
+        self.q:Queue = Queue()
         plot_process = Process(target=self.plotProcess, args=(df, self.q))
         plot_process.daemon = True
         plot_process.start()
 
-    def plotProcess(self, df: pd.DataFrame, q: Queue=None, title=""):
-        plots.plotCandlestick(self.df, title="From Trade")
+    def plotProcess(self, df: pd.DataFrame, title=""):
+        plots.plotCandlestick(self.df, title="From Trade", q=self.q)
         # fig, ax = plt.subplots()
         # ax.set_title(title)
         # ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
@@ -45,15 +46,14 @@ class PlotProcess:
         # plt.show()
 
 
-def initialize(filename:str):
-    df = pd.read_csv(filename, index_col=0, parse_dates=True)
+def initialize(df:pd.DataFrame):
     plot_process = PlotProcess(df)
-
     return plot_process
 
 
-def waitforarrival():
-    pass
+def waitforarrival(df:pd.DataFrame, q:Queue):
+    q.put(df)
+    
 
 
 def analyze():
@@ -76,18 +76,19 @@ def main():
     barfilename = "20231130.csv"
     filedirectory = '~/Data' if platform.system()=='Darwin' else 'c:/Data'
     filepath = f'{filedirectory}/{barfilename}'
-    plot_process = initialize(filepath)
-    # while not allstop:
-    # for i in range(3):
-    #     waitforarrival()
-    #     analyze()
-    #     plot(plot_process)
-    #     decide()
-    #     summarize()
+    df = pd.read_csv(filepath, index_col=0, parse_dates=True)
+    plot_process = initialize(df)
+    
+    for i in range(25):
+        # input('OKAY')
+        xf = df.iloc[[i]]
+        waitforarrival(xf, plot_process.q)
+        analyze()
+        decide()
+        summarize()
+        time.sleep(1)
         
-    #     time.sleep(1)
-
-    input("enter to stop")
+        
 
 if __name__ == "__main__":
     main()
