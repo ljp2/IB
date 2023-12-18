@@ -30,6 +30,21 @@ class CandleStickPlot():
             
         plt.pause(.25)
 
+class PlotProcess:
+    def __init__(self, df: pd.DataFrame) -> None:
+        self.df = df
+        self.i: int = 0
+        self.q: Queue = Queue()
+        plot_process = Process(target=self.plotProcess, args=(df, self.q))
+        plot_process.daemon = True
+        plot_process.start()
+
+    def plotProcess(self, df: pd.DataFrame, title=""):
+        plotCandlestick(self.df, title="From Trade", q=self.q)
+
+    def addBar(self, bardf: pd.DataFrame):
+        self.q.put(bardf)
+
 
 def plotCandlestick(df: pd.DataFrame, title, q:Queue):
     candlestick_plot = CandleStickPlot(df, title)
