@@ -10,7 +10,7 @@ import platform
 
 import plots
 
-class ArrivalIterator:
+class Arrivals:
     def __init__(self, df:pd.DataFrame):
         self.df = df
         self.index = 0
@@ -24,10 +24,14 @@ class ArrivalIterator:
             self.index += 1
             return result
         else:
-            raise StopIteration
+            return None
+            # raise StopIteration
 
-
-
+    def waitforarrival(self):
+        time.sleep(.25)
+        self.arrival = next(self)
+        return self.arrival
+    
 class PlotProcess:
     def __init__(self, df: pd.DataFrame) -> None:
         self.df = df
@@ -49,17 +53,8 @@ def initialize(df:pd.DataFrame):
     return plot_process
 
 
-def waitforarrival(df:pd.DataFrame, plot_process:PlotProcess):
-    plot_process.q.put(df)
-    
-
-
 def analyze():
     pass
-
-
-def plot(p:PlotProcess):
-    p.q.put('something')
 
 
 def decide():
@@ -74,16 +69,17 @@ def main():
     barfilename = "20231130.csv"
     filedirectory = '~/Data' if platform.system()=='Darwin' else 'c:/Data'
     filepath = f'{filedirectory}/{barfilename}'
-    df = pd.read_csv(filepath, index_col=0, parse_dates=True)
+    df = pd.read_csv(filepath, index_col=0, parse_dates=True).iloc[:60]
     plot_process = initialize(df)
-    arrivals = ArrivalIterator(df)
+    arrivals = Arrivals(df)
     
-    for newbar in arrivals:
+    while arrivals.waitforarrival() is not None:
+        newbar = arrivals.arrival
         plot_process.addBar(newbar)
         analyze()
         decide()
         summarize()
-        time.sleep(0.25)
+        
         
         
 
