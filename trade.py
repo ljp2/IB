@@ -10,6 +10,23 @@ import platform
 
 import plots
 
+class ArrivalIterator:
+    def __init__(self, df:pd.DataFrame):
+        self.df = df
+        self.index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index < len(self.df):
+            result = self.df.iloc[[self.index]]
+            self.index += 1
+            return result
+        else:
+            raise StopIteration
+
+
 
 class PlotProcess:
     def __init__(self, df: pd.DataFrame) -> None:
@@ -22,28 +39,9 @@ class PlotProcess:
 
     def plotProcess(self, df: pd.DataFrame, title=""):
         plots.plotCandlestick(self.df, title="From Trade", q=self.q)
-        # fig, ax = plt.subplots()
-        # ax.set_title(title)
-        # ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-        # # plt.xticks(rotation=30, ha='right')
-
-        # coldn = "red"
-        # colup = "green"
-        # width = (df.index[1] - df.index[0]) * 0.6
-        # width2 = width * 0.3
-
-        # up = df[df.Close >= df.Open]
-        # down = df[df.Close < df.Open]
-
-        # ax.bar(up.index, up.Close - up.Open, width, bottom=up.Open, color=colup)
-        # ax.bar(up.index, up.High - up.Close, width2, bottom=up.Close, color=colup)
-        # ax.bar(up.index, up.Low - up.Open, width2, bottom=up.Open, color=colup)
-
-        # ax.bar(down.index, down.Close - down.Open, width, bottom=down.Open, color=coldn)
-        # ax.bar(down.index, down.High - down.Open, width2, bottom=down.Open, color=coldn)
-        # ax.bar(down.index, down.Low - down.Close, width2, bottom=down.Close, color=coldn)
-
-        # plt.show()
+        
+    def addBar(self, bardf:pd.DataFrame):
+        self.q.put(bardf)
 
 
 def initialize(df:pd.DataFrame):
@@ -51,8 +49,8 @@ def initialize(df:pd.DataFrame):
     return plot_process
 
 
-def waitforarrival(df:pd.DataFrame, q:Queue):
-    q.put(df)
+def waitforarrival(df:pd.DataFrame, plot_process:PlotProcess):
+    plot_process.q.put(df)
     
 
 
@@ -78,74 +76,16 @@ def main():
     filepath = f'{filedirectory}/{barfilename}'
     df = pd.read_csv(filepath, index_col=0, parse_dates=True)
     plot_process = initialize(df)
+    arrivals = ArrivalIterator(df)
     
-    for i in range(25):
-        # input('OKAY')
-        xf = df.iloc[[i]]
-        waitforarrival(xf, plot_process.q)
+    for newbar in arrivals:
+        plot_process.addBar(newbar)
         analyze()
         decide()
         summarize()
-        time.sleep(1)
+        time.sleep(0.25)
         
         
 
 if __name__ == "__main__":
     main()
-
-
-# # Enable interactive mode
-# plt.ion()
-
-# coldn = 'red'
-# colup = 'green'
-# width = (df.index[1] - df.index[0]) * 0.6
-# width2 = width * 0.3
-
-# def plotBar(ax:axes, df:pd.DataFrame, i:int):
-#     up = df.iloc[i:i+1]
-#     ax.bar(up.index, up.Close-up.Open, width, bottom=up.Open, color=colup)
-
-# def decide():
-#     input()
-
-# # Create a figure and axis
-# fig, ax = plt.subplots()
-# ax.set_xlim(df.index[0], df.index[-1])
-# ax.set_ylim(df.Low.min(), df.High.max())
-
-# for i in range(10):
-#     plotBar(ax, df, i)
-#     plt.pause(.1)
-#     decide()
-
-
-# time.sleep(5)
-
-# Plot the initial data
-# line, = ax.plot(x, y, label='Sin(x)')
-
-# # Set labels and title
-# ax.set_xlabel('X-axis')
-# ax.set_ylabel('Y-axis')
-# ax.set_title('Interactive Matplotlib Example')
-
-# # Show legend
-# ax.legend()
-
-# Display the plot
-# plt.show()
-
-# # Now, you can interactively update the plot, for example, by modifying the data
-# for i in range(100):
-#     y = np.sin(x + i * 0.1)
-#     line.set_ydata(y)
-
-#     # Pause to allow the plot to update
-#     plt.pause(0.1)
-
-# # Turn off interactive mode when done
-# plt.ioff()
-
-# # Display the final plot (optional)
-# plt.show()
