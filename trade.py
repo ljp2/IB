@@ -57,7 +57,7 @@ def main():
     barfilename = "20231130.csv"
     filedirectory = "~/Data" if platform.system() == "Darwin" else "c:/Data"
     filepath = f"{filedirectory}/{barfilename}"
-    df = pd.read_csv(filepath, index_col=0, parse_dates=True).iloc[:60]
+    df = pd.read_csv(filepath, index_col=0, parse_dates=True).iloc[:20]
     plot_process = initialize(df)
     arrivals = Arrivals(df)
 

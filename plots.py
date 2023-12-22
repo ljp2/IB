@@ -28,7 +28,8 @@ class CandleStickPlot():
             self.ax.bar(bardf.index, bardf.High - bardf.Open, self.width2, bottom=bardf.Open, color= "red")
             self.ax.bar(bardf.index, bardf.Low - bardf.Close, self.width2, bottom=bardf.Close, color= "red")
             
-        plt.pause(.25)
+        plt.draw()
+        plt.pause(0.1)
 
 class PlotProcess:
     def __init__(self, df: pd.DataFrame) -> None:
