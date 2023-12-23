@@ -30,12 +30,11 @@ if __name__ == "__main__":
     filepath = f"{filedirectory}/{barfilename}.csv"
     df = pd.read_csv(filepath, index_col=0, parse_dates=True)
     arrivals = arrivals.Arrivals(df)
-    
-    plot_q = plots.plotProcess(df)
+    plot_process = plots.PlotProcess(df)
 
     while arrivals.waitforarrival() is not None:
         newbar = arrivals.arrival
-        plot_q.put(newbar)
+        plot_process.q.put(newbar)
         analyze()
         decide()
         summarize()
