@@ -20,6 +20,7 @@ class Arrivals:
 
     def waitforarrival(self):
         time.sleep(0.25)
+        # input()
         self.arrival = next(self)
         return self.arrival
 

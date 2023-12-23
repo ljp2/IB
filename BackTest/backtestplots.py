@@ -43,14 +43,19 @@ class Plot:
         self.ax2.yaxis.tick_right()
 
         # set axes limits .. remember x and y are shared
-        self.ax1.set_xlim(self.x_left, self.x_right)
+        self.setXlimits(self.x_left, self.x_right)
+        # self.ax1.set_xlim(self.x_left, self.x_right)
         self.ax1.set_ylim(self.y_low, self.y_high)
-        self.ax2.set_xlim(self.x_left, self.x_right)
+        # self.ax2.set_xlim(self.x_left, self.x_right)
         self.ax2.set_ylim(self.y_low, self.y_high)
 
         self.multi = MultiCursor(None, (self.ax1, self.ax2), color="r", lw=1)
 
         plt.pause(0.25)
+        
+    def setXlimits(self, left, right):
+        self.ax1.set_xlim(left, right)
+        self.ax2.set_xlim(left, right)
 
     def addCandle(self, bardf: pd.DataFrame):
         if (bardf.Close >= bardf.Open).any():
@@ -100,7 +105,7 @@ class Plot:
 
     def addBar(self, bardf: pd.DataFrame):
         if bardf.index[0] >= self.x_right:
-            pass
+            print('EXCEED', bardf.index[0])
         self.addCandle(bardf=bardf)
 
         plt.draw()
@@ -123,26 +128,9 @@ class PlotProcess(Process):
             bardf = self.q.get()
             self.candlesHA_plot.addBar(bardf=bardf)
 
-    def addBar(self, bardf: pd.DataFrame):
-        self.candlesHA_plot.addCandle(bardf=bardf)
-
-
-# def plotCandlesHA(df: pd.DataFrame, q: Queue):
-#     candlesHA_plot = Plot(df)
-#     while True:
-#         bardf = q.get()
-#         candlesHA_plot.addBar(bardf=bardf)
-
-
-# def plotProcess(df: pd.DataFrame):
-#     q = Queue()
-#     process = Process(target=plotCandlesHA, args=(df, q))
-#     process.start()
-#     return q
-
 
 if __name__ == "__main__":
-    barfilename = '20231130'
+    barfilename = "20231130"
     filedirectory = "~/Data" if platform.system() == "Darwin" else "c:/Data"
     filepath = f"{filedirectory}/{barfilename}.csv"
     df = pd.read_csv(filepath, index_col=0, parse_dates=True)
@@ -155,8 +143,4 @@ if __name__ == "__main__":
     while arrivals.waitforarrival() is not None:
         newbar = arrivals.arrival
         plot_process.q.put(newbar)
-        # analyze()
-        # decide()
-        # summarize()
-
-    input('WAITING')
+ 

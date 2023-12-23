@@ -7,8 +7,6 @@ from multiprocessing import Process, Queue
 import arrivals
 import backtestplots as plots
 
-import initialize
-
 
 def analyze():
     pass
