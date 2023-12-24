@@ -12,21 +12,23 @@ class Plot:
         self.df = df
         self.candles = []
         self.ha = []
+        self.i_last = len(df) - 1
         self.i_left = 0
-        self.i_right = 20
-        self.i_max = len(df)
+        self.i_width = 30
+        self.i_delta = 5
+        self.i_right = self.i_left + self.i_width
+        
+        self.dfleft = self.df.index[0]
+        self.dfright = self.df.index[self.i_last]
+        self.dfhigh = self.df.High.max()
+        self.dflow = self.df.Low.min()
 
-        self.dfleft = df.index[0]
-        self.dfright = df.index[-1]
-        self.dfhigh = df.High.max()
-        self.dflow = df.Low.min()
-
-        self.x_left = df.index[self.i_left]
-        self.x_right = df.index[self.i_right]
+        self.x_left = self.df.index[self.i_left]
+        self.x_right = self.df.index[self.i_right]
         self.y_high = self.dfhigh
         self.y_low = self.dflow
 
-        self.width = (df.index[1] - df.index[0]) * 0.6
+        self.width = (self.df.index[1] - self.df.index[0]) * 0.6
         self.width2 = self.width * 0.1
 
         # Create subplots with shared x-axis
@@ -44,9 +46,7 @@ class Plot:
 
         # set axes limits .. remember x and y are shared
         self.setXlimits(self.x_left, self.x_right)
-        # self.ax1.set_xlim(self.x_left, self.x_right)
         self.ax1.set_ylim(self.y_low, self.y_high)
-        # self.ax2.set_xlim(self.x_left, self.x_right)
         self.ax2.set_ylim(self.y_low, self.y_high)
 
         self.multi = MultiCursor(None, (self.ax1, self.ax2), color="r", lw=1)
@@ -103,10 +103,20 @@ class Plot:
                 color="red",
             )
 
+
+    def addHA(self, bardf: pd.DataFrame):
+        pass
+    
+    
     def addBar(self, bardf: pd.DataFrame):
-        if bardf.index[0] >= self.x_right:
-            print('EXCEED', bardf.index[0])
+        # if bardf.index[0] >= self.x_right:
+        #     self.i_left += self.i_delta
+        #     self.i_right = min(self.i_right + self.i_delta, self.i_last)
+        #     self.x_left = self.df.index[self.i_left]
+        #     self.x_right = self.df.index[self.i_right]
+        #     self.setXlimits(self.x_left, self.x_right)
         self.addCandle(bardf=bardf)
+        self.addHA(bardf=bardf)
 
         plt.draw()
         plt.pause(0.1)
