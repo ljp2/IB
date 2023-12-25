@@ -16,7 +16,7 @@ class Plot:
         self.current_i = 0
         self.i_last = len(df) - 1
         self.i_left = 0
-        self.i_width = 30
+        self.i_width = 389
         self.i_plot_shift_delta = 5
         self.i_right = self.i_left + self.i_width
 
