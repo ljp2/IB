@@ -7,12 +7,13 @@ import pandas as pd
 from multiprocessing import Process, Queue
 import platform
 
+from ha import HA
 
 class Plot:
     def __init__(self, df: pd.DataFrame, title="Plot Process") -> None:
         self.df = df
         self.bars = pd.DataFrame()
-        self.habars = pd.DataFrame()
+        self.habars = HA()
         self.current_i = 0
         self.i_last = len(df) - 1
         self.i_left = 0
@@ -110,52 +111,11 @@ class Plot:
                 color="red",
             )
 
-    def getHAbar(self, bardf: pd.DataFrame):
-        """calculates the next (or first) heiken-ashi bar and then plots it on ha (the lower plot.)
-
-        Args:
-            bardf (pd.DataFrame): the recently arrived OHLCV bar
-        """
-        if len(self.habars) == 0:
-            hadf = self.calculate_first_heiken_ashi(bardf)
-        else:
-            hadf = self.calculate_next_heiken_ashi(bardf)
-        return hadf
-
-    def calculate_first_heiken_ashi(self, df: pd.DataFrame):
-        df["HA_Close"] = (df["Open"] + df["High"] + df["Low"] + df["Close"]) / 4
-        df["HA_Open"] = df["Open"]
-        df["HA_High"] = df[["High", "HA_Open", "HA_Close"]].max(axis=1)
-        df["HA_Low"] = df[["Low", "HA_Open", "HA_Close"]].min(axis=1)
-        heiken_ashi_df = df[["HA_Open", "HA_High", "HA_Low", "HA_Close"]]
-        heiken_ashi_df.columns = ["Open", "High", "Low", "Close"]
-        return heiken_ashi_df
-
-    def calculate_next_heiken_ashi(self, new_ohlc_candle: pd.DataFrame
-    ):
-        previous_ha_candle = self.habars.iloc[-1]
-        previous_ha_open, previous_ha_close = previous_ha_candle[["Open", "Close"]]
-        new_open, new_high, new_low, new_close = new_ohlc_candle[["Open", "High", "Low", "Close"]].iloc[0]
-        ap = (new_open + new_high + new_low + new_close) / 4
-        ha_open = (previous_ha_open + previous_ha_close) / 2
-        ha_high = max(new_open, new_close, new_high, ha_open)
-        ha_low = min(new_open, new_close, new_low, ha_open)
-        ha_close = (ap + ha_open + ha_high + ha_low) / 4
-
-        data_list = [ha_open, ha_high, ha_low, ha_close]
-        heiken_ashi_df = pd.DataFrame(
-            [data_list],
-            index=new_ohlc_candle.index,
-            columns=["Open", "High", "Low", "Close"],
-        )
-        return heiken_ashi_df
-
     def addBar(self, bardf: pd.DataFrame):
         self.bars = pd.concat([self.bars, bardf])
         self.plotBar(bardf=bardf, ax=self.ax1)
         
-        habardf = self.getHAbar(bardf=bardf)
-        self.habars = pd.concat([self.habars, habardf])
+        habardf = self.habars.addBar(ohlc_bar=bardf)
         self.plotBar(bardf=habardf, ax=self.ax2)
         plt.draw()
         plt.pause(0.1)
