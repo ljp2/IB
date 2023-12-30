@@ -1,3 +1,4 @@
+import platform
 import pandas as pd
 from pandas import DataFrame as DF
 from utils import ExponentialSmoothing as ES
@@ -22,14 +23,15 @@ class HAMA:
         
         
     def addBar(self, ohlcbar:DF):
-        self.ohlcbars = pd.concat(self.ohlcbars, ohlcbar)
-        O,H,L,C = ohlcbar.iloc[0]
+        self.ohlcbars = pd.concat([self.ohlcbars, ohlcbar])
+        O,H,L,C,_ = ohlcbar.iloc[0].values
         nO = self.exOpen.update(O)
         nH = self.exOpen.update(H)
         nL = self.exOpen.update(L)
         nC = self.exOpen.update(C)
-        smooth_olhc_bar =  pd.DataFrame([[nO,nH,nL,nC]], index=ohlc_bar.index,  columns=["Open", "High", "Low", "Close"] )
+        smooth_olhc_bar =  pd.DataFrame([[nO,nH,nL,nC]], index=ohlcbar.index,  columns=["Open", "High", "Low", "Close"] )
         new_hama_bar = self.ha.addBar(smooth_olhc_bar)
+        return new_hama_bar
         
 import arrivals
 if __name__ == "__main__":
@@ -38,8 +40,11 @@ if __name__ == "__main__":
     filepath = f"{filedirectory}/{barfilename}.csv"
     df = pd.read_csv(filepath, index_col=0, parse_dates=True)
     arrivals = arrivals.Arrivals(df)
+    hama = HAMA()
 
     while arrivals.waitforarrival() is not None:
         newbar = arrivals.arrival
+        newhamabar = hama.addBar(newbar)
+        print(newhamabar)
         
    
