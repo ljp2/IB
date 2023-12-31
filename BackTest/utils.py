@@ -2,8 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class ExponentialSmoothing:
-    def __init__(self, alpha):
-        self.alpha = alpha
+    def __init__(self, alpha=NotImplemented, length=NotImplemented):
+        if alpha is NotImplemented:
+            self.alpha = 2.0 / (length + 1)
+        else:
+            self.alpha = alpha
+        print(self.alpha)
         self.smoothed_data = []
         self.new_smoothed_value = None
 

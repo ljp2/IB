@@ -11,27 +11,29 @@ class HAMA:
         self.smooth_ohlcbars = DF()
         self.hamabars = DF()
         
-        self.periodOpen = 5
-        self.periodHigh = 5
-        self.periodLow = 5
-        self.periodClose = 5
+        self.periodOpen  = 3
+        self.periodHigh  = 3
+        self.periodLow  =  3
+        self.periodClose = 3
         
-        self.exOpen = ES(self.periodOpen)
-        self.exHigh = ES(self.periodHigh)
-        self.exLow = ES(self.periodLow)
-        self.exClose = ES(self.periodClose)
+        # self.exOpen = ES(self.periodOpen)
+        self.exOpen = ES(length=3)
+        self.exHigh = ES(length=self.periodHigh)
+        self.exLow = ES(length=self.periodLow)
+        self.exClose = ES(length=self.periodClose)
         
         
     def addBar(self, ohlcbar:DF):
         self.ohlcbars = pd.concat([self.ohlcbars, ohlcbar])
         O,H,L,C,_ = ohlcbar.iloc[0].values
         nO = self.exOpen.update(O)
-        nH = self.exOpen.update(H)
-        nL = self.exOpen.update(L)
-        nC = self.exOpen.update(C)
+        nH = self.exHigh.update(H)
+        nL = self.exLow.update(L)
+        nC = self.exClose.update(C)
         smooth_olhc_bar =  pd.DataFrame([[nO,nH,nL,nC]], index=ohlcbar.index,  columns=["Open", "High", "Low", "Close"] )
         new_hama_bar = self.ha.addBar(smooth_olhc_bar)
         return new_hama_bar
+
         
 import arrivals
 if __name__ == "__main__":
@@ -44,7 +46,11 @@ if __name__ == "__main__":
 
     while arrivals.waitforarrival() is not None:
         newbar = arrivals.arrival
+        o,h,l,c,_ = newbar.iloc[0].values
         newhamabar = hama.addBar(newbar)
-        print(newhamabar)
+        nO,nH,nL,nC = newhamabar.iloc[0].values
+        print(o,h,l,c)
+        print(nO,nH,nL,nC)
+
         
    
