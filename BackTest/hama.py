@@ -35,8 +35,9 @@ class HAMA:
         return new_hama_bar
 
         
-import arrivals
+
 if __name__ == "__main__":
+    import arrivals
     barfilename = "20231130"
     filedirectory = "~/Data" if platform.system() == "Darwin" else "c:/Data"
     filepath = f"{filedirectory}/{barfilename}.csv"
