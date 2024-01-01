@@ -89,9 +89,9 @@ class CandlestickWidget(pg.PlotWidget):
             self.plotCandle(candle_data)
             current_candle_index += 1
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
+# class MainWindow(QMainWindow):
+#     def __init__(self):
+#         super(MainWindow, self).__init__()
 
             
             
