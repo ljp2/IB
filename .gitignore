@@ -1,8 +1,6 @@
 .DS_Store
 __pycache__
 
-test.py 
-
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -30,3 +28,5 @@ test.py
 .vscode/launch.json 
 .vscode/extensions.json 
 .history
+
+Older/
