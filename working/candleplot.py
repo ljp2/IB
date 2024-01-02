@@ -7,6 +7,8 @@ import numpy as np
 class CandlestickWidget(pg.PlotWidget):
     def __init__(self):
         super(CandlestickWidget, self).__init__()
+        self.candle_width = 0.3
+        self.wick_width = 0.03
 
         # Create an OHLC plot
         self.setBackground("w")
@@ -18,15 +20,15 @@ class CandlestickWidget(pg.PlotWidget):
     def plot_candle(self, time, open_price, high, low, close_price):
         if open_price < close_price:
             # Bullish candle
-            self.addItem(pg.BarGraphItem(x=[time], height=[close_price - open_price], width=0.2, y=open_price, brush='g'))
+            self.addItem(pg.BarGraphItem(x=[time], height=[close_price - open_price], width=self.candle_width, y=open_price, brush='g'))
             self.addItem(pg.PlotDataItem(x=[time, time], y=[low, high], pen='g'))
         elif open_price > close_price:
             # Bearish candle
-            self.addItem(pg.BarGraphItem(x=[time], height=[open_price - close_price], width=0.2, y=close_price, brush='r'))
+            self.addItem(pg.BarGraphItem(x=[time], height=[open_price - close_price], width=self.candle_width, y=close_price, brush='r'))
             self.addItem(pg.PlotDataItem(x=[time, time], y=[low, high], pen='r'))
         else:
             # Open price equals close price (neutral candle)
-            self.addItem(pg.BarGraphItem(x=[time], height=[0.1], width=0.2, y=open_price, brush='b'))
+            self.addItem(pg.BarGraphItem(x=[time], height=[0.1], width=self.candle_width, y=open_price, brush='b'))
             self.addItem(pg.PlotDataItem(x=[time, time], y=[low, high], pen='b'))     
 
 class MainWindow(QMainWindow):
