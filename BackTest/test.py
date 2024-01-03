@@ -15,19 +15,17 @@ candles_to_draw = [
 current_candle_index = 0
 
 
-
-class CandlestickWidget(pg.PlotWidget):
+class CandlestickPlotWidget(pg.PlotWidget):
     def __init__(self, parent=None):
-        super(CandlestickWidget, self).__init__(parent)
+        super().__init__(parent)
         
+        self.coordinate_label = pg.TextItem("", anchor=(0, 1), color=(255, 255, 255))
+        self.addItem(self.coordinate_label, ignoreBounds=True)
         self.crosshair_vline = pg.InfiniteLine(angle=90, movable=False, pen='w')
         self.crosshair_hline = pg.InfiniteLine(angle=0, movable=False, pen='w')
         self.addItem(self.crosshair_vline, ignoreBounds=True)
         self.addItem(self.crosshair_hline, ignoreBounds=True)
 
-        self.coordinate_label = pg.TextItem("", anchor=(0, 1), color=(255, 255, 255))
-        self.addItem(self.coordinate_label, ignoreBounds=True)
-        
         self.is_left_button_pressed = False
         self.data = []
         
@@ -89,17 +87,12 @@ class CandlestickWidget(pg.PlotWidget):
             self.plotCandle(candle_data)
             current_candle_index += 1
 
-# class MainWindow(QMainWindow):
-#     def __init__(self):
-#         super(MainWindow, self).__init__()
 
-            
-            
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.candlestickWidget = CandlestickWidget(self)
+        self.candlestickWidget = CandlestickPlotWidget(self)
         
         self.candlestickWidget.setRange(xRange=(0,5), yRange=(0,5))
         
